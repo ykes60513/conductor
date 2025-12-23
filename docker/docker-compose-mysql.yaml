@@ -10,13 +10,10 @@ services:
     build:
       context: ../
       dockerfile: docker/server/Dockerfile
-      args:
-        YARN_OPTS: ${YARN_OPTS}
     networks:
       - internal
     ports:
       - 8080:8080
-      - 8127:5000
     healthcheck:
       test: [ "CMD", "curl","-I" ,"-XGET", "http://localhost:8080/health" ]
       interval: 60s
@@ -24,28 +21,48 @@ services:
       retries: 12
     links:
       - conductor-elasticsearch:es
-      - conductor-mysql:mysql
-      - conductor-redis:rs
+      - conductor-mariadb:mariadb
     depends_on:
       conductor-elasticsearch:
         condition: service_healthy
-      conductor-mysql:
-        condition: service_healthy
-      conductor-redis:
+      conductor-mariadb:
         condition: service_healthy
     logging:
       driver: "json-file"
       options:
         max-size: "1k"
         max-file: "3"
-
-  conductor-mysql:
-    image: mysql:latest
+  conductor-ui:
     environment:
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: conductor
-      MYSQL_USER: conductor
-      MYSQL_PASSWORD: conductor
+      - YARN_OPTS=-Xms512m -Xmx1024m
+      - WF_SERVER=http://localhost:8080
+    image: conductor:ui
+    container_name: conductor-ui
+    build: 
+      context: ../
+      dockerfile: docker/ui/Dockerfile
+      args:
+        YARN_OPTS: ${YARN_OPTS}
+    networks:
+      - internal
+    ports:
+      - 5000:5000
+    depends_on:
+      conductor-server:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+  
+  conductor-mariadb:
+    image: mariadb:10.6.19
+    environment:
+      MARIADB_ROOT_PASSWORD: 12345
+      MARIADB_DATABASE: conductor
+      MARIADB_USER: conductor
+      MARIADB_PASSWORD: conductor
     volumes:
       - type: volume
         source: conductor_mysql
@@ -60,19 +77,8 @@ services:
       timeout: 5s
       retries: 12
 
-  conductor-redis:
-    image: redis:6.2.3-alpine
-    volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - internal
-    ports:
-      - 7379:6379
-    healthcheck:
-      test: [ "CMD", "redis-cli","ping" ]
-
   conductor-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.2
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
       - xpack.security.enabled=false
