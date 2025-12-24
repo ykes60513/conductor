@@ -33,9 +33,6 @@ services:
         max-size: "1k"
         max-file: "3"
   conductor-ui:
-    environment:
-      - YARN_OPTS=-Xms512m -Xmx1024m
-      - WF_SERVER=http://localhost:8080
     image: conductor:ui
     container_name: conductor-ui
     build: 
@@ -46,10 +43,9 @@ services:
     networks:
       - internal
     ports:
-      - 5000:5000
-    depends_on:
-      conductor-server:
-        condition: service_healthy
+      - 8127:5000
+    environment:
+      WF_SERVER: http://conductor-server:8080
     logging:
       driver: "json-file"
       options:
