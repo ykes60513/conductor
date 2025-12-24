@@ -8,7 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:3.3.5'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:3.4.1'
         classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.+'
     }
 }
@@ -21,13 +21,13 @@ plugins {
     id 'signing'
     id 'java-library'
     id "com.diffplug.spotless" version "6.25.0"
-    id 'org.springframework.boot' version '3.3.5'
+    id 'org.springframework.boot' version '3.4.1'
 }
 
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
-ext["tomcat.version"] = "10.1.41"
+ext["tomcat.version"] = "11.0.6"
 
 subprojects {
     tasks.withType(Javadoc).all { enabled = false }
@@ -76,6 +76,12 @@ allprojects {
         imports {
             // dependency versions for the BOM can be found at https://docs.spring.io/spring-boot/docs/3.1.4/reference/htmlsingle/#appendix.dependency-versions
             mavenBom(SpringBootPlugin.BOM_COORDINATES)
+        }
+        dependencies {
+            dependency "com.google.protobuf:protobuf-java:3.25.5"
+            dependency "com.google.protobuf:protobuf-java-util:3.25.5"
+            dependency "io.grpc:grpc-protobuf:1.73.0"
+            dependency "io.grpc:grpc-stub:1.73.0"
         }
     }
 
