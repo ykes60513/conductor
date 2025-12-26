@@ -16,7 +16,7 @@ WORKDIR /usr/src/app
 COPY ./ui/package.json ./
 
 # Installs all node packages. Cached unless package.json changes
-RUN YARN_NETWORK_TIMEOUT=600000 yarn install && mkdir -p public && cp -r node_modules/monaco-editor public/
+RUN YARN_NETWORK_TIMEOUT=600000 yarn install --production && mkdir -p public && cp -r node_modules/monaco-editor public/ && yarn cache clean --all
 
 # Copies everything else over to Docker environment
 # node_modules excluded in .dockerignore.
