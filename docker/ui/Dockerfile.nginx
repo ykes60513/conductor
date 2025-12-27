@@ -1,0 +1,34 @@
+#
+# conductor:server - Build Conductor UI
+#
+# ===========================================================================================================
+# 1. Builder stage 2
+# ===========================================================================================================
+FROM alpine:3.20 AS ui-builder
+ARG YARN_OPTS
+
+LABEL maintainer="Orkes OSS <oss@orkes.io>"
+
+# Install dependencies
+RUN apk add --update nodejs npm yarn
+
+COPY . /conductor
+WORKDIR /conductor/ui
+
+# Include monaco sources into bundle (instead of using CDN)
+ENV REACT_APP_MONACO_EDITOR_USING_CDN=false
+ENV REACT_APP_ENABLE_ERRORS_INSPECTOR=true
+RUN yarn ${YARN_OPTS} install && cp -r node_modules/monaco-editor public/ && yarn ${YARN_OPTS} build
+RUN ls -ltr
+RUN echo "Done building UI"
+
+
+FROM nginx:1.25-alpine
+
+# UI static assets
+COPY --from=ui-builder /conductor/ui/build /usr/share/nginx/html
+
+# nginx template: official entrypoint will envsubst templates automatically
+COPY --from=ui-builder /conductor/docker/ui/nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
+
+EXPOSE 5000

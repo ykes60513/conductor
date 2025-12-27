@@ -37,7 +37,7 @@ services:
     container_name: conductor-ui
     build: 
       context: ../
-      dockerfile: docker/ui/Dockerfile
+      dockerfile: docker/ui/Dockerfile.nginx
       args:
         YARN_OPTS: ${YARN_OPTS}
     networks:
