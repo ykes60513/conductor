@@ -12,7 +12,8 @@ LABEL maintainer="Orkes OSS <oss@orkes.io>"
 # Install dependencies
 RUN apk add --update nodejs npm yarn
 
-COPY . /conductor
+COPY ./ui ./conductor/ui
+COPY ./docker/ui ./conductor/docker/ui
 WORKDIR /conductor/ui
 
 # Include monaco sources into bundle (instead of using CDN)
