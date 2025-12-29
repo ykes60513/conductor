@@ -24,7 +24,7 @@ RUN ls -ltr
 RUN echo "Done building UI"
 
 
-FROM nginx:1.25-alpine
+FROM nginx:1.28.1-alpine3.23
 
 # UI static assets
 COPY --from=ui-builder /conductor/ui/build /usr/share/nginx/html
