@@ -16,10 +16,6 @@
 
 echo "Starting Conductor server"
 
-echo "Running Nginx in background"
-# Start nginx as daemon
-nginx
-
 # Start the server
 cd /app/libs
 echo "Property file: $CONFIG_PROP"
