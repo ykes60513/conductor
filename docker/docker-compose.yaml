@@ -6,7 +6,7 @@ services:
       - CONFIG_PROP=config-redis.properties
       - JAVA_OPTS=-Dpolyglot.engine.WarnInterpreterOnly=false
       - conductor.app.ownerEmailMandatory=false
-    image: conductor:server
+    image: conductor-server
     container_name: conductor-server
     build:
       context: ../
@@ -17,7 +17,6 @@ services:
       - internal
     ports:
       - 8080:8080
-      - 8127:5000
     healthcheck:
       test: ["CMD", "curl","-I" ,"-XGET", "http://localhost:8080/health"]
       interval: 60s
@@ -36,6 +35,21 @@ services:
       options:
         max-size: "1k"
         max-file: "3"
+
+  conductor-ui:
+    image: conductor-ui
+    build:
+      context: ../
+      dockerfile: docker/ui/Dockerfile
+    networks:
+      - internal
+    ports:
+      - 8127:5000
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor-server:8080
+    depends_on:
+      conductor-server:
+        condition: service_healthy
 
   conductor-redis:
     image: redis:6.2.3-alpine
