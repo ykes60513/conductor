@@ -4,9 +4,11 @@
 # ===========================================================================================================
 # 0. Builder stage 1
 # ===========================================================================================================
-FROM azul/zulu-openjdk-debian:17 AS builder
+FROM azul/zulu-openjdk-debian:21 AS builder
 
 ARG INDEXING_BACKEND=elasticsearch
+
+LABEL maintainer="Orkes OSS <oss@orkes.io>"
 
 # Copy the project directly onto the image
 COPY . /conductor
@@ -18,11 +20,15 @@ WORKDIR /server/build/libs
 RUN ls -ltr
 
 # ===========================================================================================================
-# 1. Bin stage
+# 2. Bin stage
 # ===========================================================================================================
-FROM alpine:3.19
+FROM debian:stable-slim
 
-RUN apk add openjdk17
+LABEL maintainer="Orkes OSS <oss@orkes.io>"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openjdk-21-jre-headless curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Make app folders
 RUN mkdir -p /app/config /app/logs /app/libs
