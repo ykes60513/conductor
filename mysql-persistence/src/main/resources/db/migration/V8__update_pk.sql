@@ -101,3 +101,5 @@ CALL FixPkIfNeeded('meta_workflow_def', 'name, version');
 
 CALL DropIndexIfExists('meta_task_def', 'unique_task_def_name');
 CALL FixPkIfNeeded('meta_task_def','name');
+
+ALTER TABLE workflow ADD INDEX `workflow_created_on_index` (created_on), ALGORITHM=INPLACE, LOCK=NONE;
