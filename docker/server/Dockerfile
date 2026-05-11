@@ -22,13 +22,13 @@ RUN ls -ltr
 # ===========================================================================================================
 # 2. Bin stage
 # ===========================================================================================================
-FROM debian:stable-slim
+FROM alpine:3.20
 
 LABEL maintainer="Orkes OSS <oss@orkes.io>"
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends openjdk-21-jre-headless curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add openjdk17
+RUN apk add nginx
+RUN apk add curl
 
 # Make app folders
 RUN mkdir -p /app/config /app/logs /app/libs
