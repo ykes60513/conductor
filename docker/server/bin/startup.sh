@@ -33,4 +33,36 @@ fi
 
 echo "Using java options config: $JAVA_OPTS"
 
-java ${JAVA_OPTS} -jar -DCONDUCTOR_CONFIG_FILE=$config_file conductor-server.jar 2>&1 | tee -a /app/logs/server.log
+# ==============================
+# OpenTelemetry Java Agent
+# ==============================
+
+OTEL_AGENT_PATH=${OTEL_AGENT_PATH:-/otel/opentelemetry-javaagent.jar}
+OTEL_ENABLED=${OTEL_ENABLED:-true}
+
+OTEL_JAVA_OPTS=""
+
+if [ "$OTEL_ENABLED" = "true" ] && [ -f "$OTEL_AGENT_PATH" ]; then
+  echo "OpenTelemetry Java Agent enabled: $OTEL_AGENT_PATH"
+
+  OTEL_JAVA_OPTS="
+    -javaagent:$OTEL_AGENT_PATH
+    -Dotel.service.name=${OTEL_SERVICE_NAME:-conductor-server}
+    -Dotel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES:-env=local,service=conductor}
+    -Dotel.traces.exporter=${OTEL_TRACES_EXPORTER:-otlp}
+    -Dotel.metrics.exporter=${OTEL_METRICS_EXPORTER:-none}
+    -Dotel.logs.exporter=${OTEL_LOGS_EXPORTER:-none}
+    -Dotel.exporter.otlp.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4317}
+    -Dotel.exporter.otlp.protocol=${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+    -Dotel.traces.sampler=${OTEL_TRACES_SAMPLER:-parentbased_traceidratio}
+    -Dotel.traces.sampler.arg=${OTEL_TRACES_SAMPLER_ARG:-0.01}
+    -Dotel.instrumentation.jdbc.enabled=${OTEL_INSTRUMENTATION_JDBC_ENABLED:-true}
+  "
+else
+  echo "OpenTelemetry Java Agent disabled or not found: $OTEL_AGENT_PATH"
+fi
+
+java \
+  ${JAVA_OPTS} \
+  -DCONDUCTOR_CONFIG_FILE=$config_file \
+  -jar conductor-server.jar 
